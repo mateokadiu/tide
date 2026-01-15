@@ -51,6 +51,12 @@ marketing veneer.
 - Browser-side extraction in the extension. Server-side only — fewer
   surprises, better paywall handling, archival HTML is centralised.
 - Annotations export to Readwise / Notion in v1 (ADR-TBD for v1.1).
+- Multi-tenant teams, shared libraries, role-based access.
+- Native desktop apps.
+- Inbound RSS/feed ingestion (v1.1; users save individual articles for now).
+- Importing from Pocket / Omnivore / Instapaper exports (v1.1; documented manual path via the REST API).
+- Paid plans / billing. Self-host model; the demo node is best-effort.
+- iCal / calendar integration. Not a calendar product.
 
 ## 4. Architecture
 
@@ -163,20 +169,7 @@ Implementation follows the phases below — each phase is shippable on its own.
 9. **Tests + quality** — Vitest, Playwright, autocannon, ADRs, docs.
 10. **Demo + release** — seed, screenshots, README, Lighthouse audit, v0.1.0 tag.
 
-## 7. Out of scope (explicit)
-
-- Multi-tenant teams, shared libraries, role-based access.
-- Native iOS / Android apps (PWA only).
-- Native desktop apps.
-- Annotations export to Readwise / Notion / Obsidian (v1.1).
-- Inbound RSS/feed ingestion (v1.1; users save individual articles for now).
-- Importing from Pocket / Omnivore / Instapaper exports (v1.1; documented manual path via the REST API).
-- Bring-your-own LLM beyond Anthropic / OpenAI / Voyage.
-- Browser-side extraction (server-only for archival consistency).
-- Paid plans / billing. Self-host model; the demo node is best-effort.
-- iCal / calendar integration. Not a calendar product.
-
-## 8. Risk register
+## 7. Risk register
 
 | Risk | Mitigation |
 | ---- | ---------- |
@@ -186,7 +179,7 @@ Implementation follows the phases below — each phase is shippable on its own.
 | Oracle Cloud Always-Free trims capacity. | Docker Compose path runs on any 1-vCPU/1GB VPS for $5/mo. |
 | Self-hoster forgets to set rate limit envs. | Sane defaults baked in; loud warning at boot if Upstash creds are absent and the deployment is public. |
 
-## 9. Versioning
+## 8. Versioning
 
 `v0.1.0` ships the scope above. Semver from there; breaking schema changes
 get a migration script and a release-notes entry.
