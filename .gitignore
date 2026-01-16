@@ -1,0 +1,60 @@
+# deps
+node_modules/
+.pnpm-store/
+
+# build
+dist/
+build/
+.next/
+.turbo/
+out/
+.vercel/
+.wrangler/
+*.tsbuildinfo
+
+# env
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# os
+.DS_Store
+Thumbs.db
+
+# editor
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# data
+data/
+*.sqlite
+*.sqlite-journal
+*.db
+*.db-journal
+
+# coverage
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+
+# misc
+.cache/
+*.local
+*.tsbuildinfo
+
+# extension build
+packages/extension/dist/
+packages/extension/*.zip
+
+# pulumi
+**/Pulumi.*.yaml.bak
+**/stack-*.json
