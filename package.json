@@ -1,0 +1,41 @@
+{
+  "name": "tide",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Self-hostable read-later. Save anything from anywhere.",
+  "license": "MIT",
+  "author": "Mateo Kadiu <mateokadiu17@gmail.com>",
+  "homepage": "https://github.com/mateokadiu/tide",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mateokadiu/tide.git"
+  },
+  "scripts": {
+    "build": "pnpm -r build",
+    "dev": "pnpm --filter @tide/web dev",
+    "lint": "biome lint .",
+    "lint:fix": "biome lint --write .",
+    "format": "biome format --write .",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "test:e2e": "pnpm --filter @tide/web test:e2e",
+    "test:loadtest": "pnpm --filter @tide/web test:loadtest",
+    "db:generate": "pnpm --filter @tide/web db:generate",
+    "db:migrate": "pnpm --filter @tide/web db:migrate",
+    "db:push": "pnpm --filter @tide/web db:push",
+    "db:studio": "pnpm --filter @tide/web db:studio",
+    "seed:demo": "pnpm --filter @tide/web seed:demo",
+    "build:standalone": "TIDE_STANDALONE=1 pnpm --filter @tide/web build:standalone",
+    "ext:build": "pnpm --filter @tide/extension build",
+    "ext:zip": "pnpm --filter @tide/extension zip"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "typescript": "5.6.3"
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=10.0.0"
+  },
+  "packageManager": "pnpm@10.30.3"
+}
