@@ -1,0 +1,159 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  typecheck-lint-test:
+    name: typecheck · lint · test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: tide
+          POSTGRES_PASSWORD: tide
+          POSTGRES_DB: tide_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U tide"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgres://tide:tide@localhost:5432/tide_test
+      DATABASE_DRIVER: postgres
+      REDIS_URL: redis://localhost:6379
+      NEXTAUTH_URL: http://localhost:3000
+      AUTH_SECRET: ci-secret-32-bytes-of-padding-xxx
+      ANTHROPIC_API_KEY: sk-ant-ci-fake
+      VOYAGE_API_KEY: vy-ci-fake
+      OPENAI_API_KEY: sk-ci-fake
+      RESEND_API_KEY: re_ci_fake
+      STORAGE_DRIVER: local
+      STORAGE_LOCAL_DIR: /tmp/tide-storage
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: lint
+        run: pnpm lint
+
+      - name: typecheck
+        run: pnpm typecheck
+
+      - name: db migrate
+        run: pnpm --filter @tide/web db:migrate
+
+      - name: test
+        run: pnpm test
+
+      - name: build
+        run: pnpm build
+
+  lighthouse:
+    name: lighthouse audit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    needs: typecheck-lint-test
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @tide/web build
+      - name: lighthouse audit
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          configPath: ./apps/web/lighthouserc.json
+          uploadArtifacts: true
+
+  e2e:
+    name: playwright e2e
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    needs: typecheck-lint-test
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: tide
+          POSTGRES_PASSWORD: tide
+          POSTGRES_DB: tide_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U tide"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+
+    env:
+      DATABASE_URL: postgres://tide:tide@localhost:5432/tide_test
+      DATABASE_DRIVER: postgres
+      REDIS_URL: redis://localhost:6379
+      AUTH_SECRET: ci-secret-32-bytes-of-padding-xxx
+      ANTHROPIC_API_KEY: sk-ant-ci-fake
+      STORAGE_DRIVER: local
+      STORAGE_LOCAL_DIR: /tmp/tide-storage
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @tide/web exec playwright install --with-deps chromium
+      - run: pnpm --filter @tide/web db:migrate
+      - run: pnpm test:e2e
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: apps/web/playwright-report
+          retention-days: 7
