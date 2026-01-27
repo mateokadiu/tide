@@ -15,6 +15,7 @@ if (env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET) {
   };
 }
 if (env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET) {
+  // Workspace + consumer accounts both work. Scopes default to openid email profile.
   providers.google = {
     clientId: env.GOOGLE_CLIENT_ID,
     clientSecret: env.GOOGLE_CLIENT_SECRET,
