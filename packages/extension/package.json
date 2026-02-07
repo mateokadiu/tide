@@ -1,0 +1,23 @@
+{
+  "name": "@tide/extension",
+  "version": "0.1.0",
+  "description": "tide browser extension — chrome + firefox MV3.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "build:firefox": "TARGET=firefox vite build",
+    "typecheck": "tsc --noEmit",
+    "zip": "node scripts/zip.mjs",
+    "test": "echo no tests yet"
+  },
+  "dependencies": {
+    "webextension-polyfill": "0.12.0"
+  },
+  "devDependencies": {
+    "@types/chrome": "0.0.287",
+    "@types/webextension-polyfill": "0.12.1",
+    "typescript": "5.6.3",
+    "vite": "5.4.11"
+  }
+}
