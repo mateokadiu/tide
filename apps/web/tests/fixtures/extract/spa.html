@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Notes on Caching</title>
+<link rel="canonical" href="https://notes.example/caching" />
+<meta property="og:site_name" content="Notes" />
+<meta property="og:title" content="Notes on Caching" />
+<meta property="og:description" content="A short essay on cache hierarchies, invalidation, and why most caches are write-through whether their authors realise it or not." />
+</head>
+<body>
+<div id="root">
+<noscript>
+  <article>
+    <h1>Notes on Caching</h1>
+    <p>"There are only two hard things in Computer Science: cache invalidation and naming things." Phil Karlton's joke is older than most of the caches I have ever worked with, and it is still the best one-line summary of the field. This is a short essay on cache hierarchies, on the design decisions that produce write-through caches whether their authors realise it or not, and on why the second hard thing — naming — sneaks back into the first.</p>
+    <h2>Hierarchies</h2>
+    <p>Almost every system I have worked on has at least three caches, even if only one is called by that name. There is the in-process LRU at the application layer. There is the shared Redis or Memcached. And there is the browser cache for any HTTP response that escaped the building. Latency hierarchies stack neatly: 100ns, 1ms, 100ms. So do failure modes: process crash, network partition, user clears their cookies.</p>
+    <h2>Write-through by accident</h2>
+    <p>The interesting observation, and the one that took me longest to internalise, is that almost every cache I have ever built is write-through, whether the author calls it that or not. The pattern is: write to the source of truth, then either explicitly invalidate the cache or rely on the cache's TTL. In both cases, the cache is reading the new value on the next request, and the request after that is going to get the cached value back. That is, by definition, write-through. The TTL is just a slower invalidation.</p>
+    <h2>The hard part is still naming</h2>
+    <p>The keys are what kill you. The moment two callers share a cache and disagree about what a key means, you have a bug that takes a quarter to find. I have started writing key schemas into the type system: a CacheKey type that knows its prefix and its decoder. It hasn't eliminated bugs, but it has moved them from runtime to compile-time, which is a victory I will take.</p>
+  </article>
+</noscript>
+<script>document.getElementById('root').innerHTML='<div>Loading client...</div>';</script>
+</div>
+</body>
+</html>

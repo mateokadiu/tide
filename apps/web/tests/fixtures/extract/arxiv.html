@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>arXiv:2601.04891 — Sub-quadratic attention with rotary kv compression</title>
+<link rel="canonical" href="https://arxiv.org/abs/2601.04891" />
+<meta property="og:site_name" content="arXiv" />
+</head>
+<body>
+<div id="content">
+<h1 class="title">Title: Sub-quadratic attention with rotary kv compression for long-context language models</h1>
+<div class="authors">Authors: Ada Liang, Marek Chen, Priya Anand, Tomasz Kowalski</div>
+<blockquote class="abstract">
+<span class="descriptor">Abstract:</span>
+Recent work on long-context language models has focused on alternatives to the standard quadratic attention mechanism, including state-space models, linear attention variants, and sliding-window approximations. We introduce Rotary KV Compression (RKVC), a drop-in modification to standard transformer attention that exchanges asymptotic complexity for a measurable but bounded loss in benchmark accuracy. RKVC reduces the key-value cache size by a factor of k via a learned linear projection applied along the head dimension, while preserving rotary position encoding so that relative position information is not lost. On Llama-style 7B models trained from scratch at 32k context, RKVC achieves 78 percent of baseline perplexity at k=4 and 91 percent at k=2, with end-to-end attention compute reduced by 47 percent. We further demonstrate that RKVC composes cleanly with FlashAttention-3 kernels and with grouped-query attention, allowing the technique to be applied to existing production-scale models with no architectural changes other than the addition of the compression projection. Code and pretrained checkpoints are released. We see this work as orthogonal to and combinable with state-space and linear-attention approaches: at long-context retrieval tasks the highest accuracy was achieved by stacking RKVC with a four-layer Mamba-style block, suggesting hybrid architectures remain a promising direction for the next generation of long-context models.
+</blockquote>
+<div class="submission-history">Submitted on 9 Jan 2026</div>
+</div>
+</body>
+</html>

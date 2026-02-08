@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Why I stopped using Redis for rate limiting — DEV Community</title>
+<link rel="canonical" href="https://dev.to/zara_dev/why-i-stopped-using-redis-for-rate-limiting-2g3h" />
+<meta property="og:site_name" content="DEV Community" />
+<meta property="og:image" content="https://dev.to/social_previews/article/1234567.png" />
+<meta name="author" content="Zara Patel" />
+</head>
+<body>
+<header><nav>DEV</nav></header>
+<main>
+<article>
+<h1>Why I stopped using Redis for rate limiting</h1>
+<p class="byline">Zara Patel · Feb 5</p>
+<p>For three years, every Node.js service I wrote rate-limited the same way: ioredis client, atomic INCR with EXPIRE, return 429 when the count crossed the limit. It worked, mostly. Then last month I deleted all of it and replaced it with a Postgres advisory lock + a counter table. Latency went down. Reliability went up. Here's why.</p>
+<h2>The original setup</h2>
+<p>The naive Redis sliding window is famous for a reason. It's three lines of Lua, atomic, and runs in O(1). At small scale it's hard to beat. But there are three things nobody tells you until you're at 2,000 requests per second.</p>
+<p>First: Redis becomes a single point of failure for a feature that is supposed to gate failures. If Redis is down, your rate limiter is down, and you have to decide between "fail open" (let everyone through, including the attacker you were trying to block) and "fail closed" (block everyone, including legitimate users). Neither is good.</p>
+<p>Second: the second you have multiple services that all want to rate-limit, you end up either sharing a Redis or running one per service. Sharing means one team's bug becomes everyone's problem. Per-service means you're paying for a cluster you barely use.</p>
+<p>Third: Redis's persistence story is "eventual." If the node restarts you lose the in-flight counters. That's fine for rate limiting, in theory. In practice it means a deploy = your limits reset = you can be hammered for the 90 seconds it takes Redis to repopulate.</p>
+<h2>The replacement</h2>
+<p>The new design is dumb. There's a table called <code>rate_buckets</code> with three columns: <code>key</code>, <code>window_start</code>, and <code>count</code>. Inserts are upserts. The query plan is one index scan and one UPDATE. Postgres handles concurrency with row-level locking. We're seeing p99 of 1.4ms for the limiter call. Redis was 0.9ms. We gave up 0.5ms and got a system that survives Postgres restarts the same way the rest of the app does — which is to say, well, because Postgres restarts are reliable.</p>
+<p>The advisory lock is for one specific case: distributed token-bucket refills. We use <code>pg_try_advisory_xact_lock</code> to ensure only one connection at a time refills a given bucket. Without it, two concurrent refillers could double-credit. With it, the second caller no-ops cleanly.</p>
+<h2>When NOT to do this</h2>
+<p>If you're rate-limiting at the edge — like, behind a Cloudflare worker — this won't help you. The latency to your Postgres from the edge is going to be 30-50ms, which is way worse than a Redis at the edge. In that case, keep the Redis, or use a distributed rate limiter that's purpose-built for the edge.</p>
+<p>If your traffic is in tens of thousands of requests per second per limiter key, the Redis Lua script will still beat Postgres. The crossover point in my benchmarks was roughly 5,000 rps per key.</p>
+<h2>Bottom line</h2>
+<p>For most internal APIs at most companies, rate limiting in Postgres is good enough, simpler to reason about, and one fewer thing to monitor. The hardest part was admitting we'd been carrying a dependency we didn't need.</p>
+</article>
+</main>
+<aside class="crayons-card--secondary">Follow Zara</aside>
+<footer>Copyright DEV</footer>
+</body>
+</html>

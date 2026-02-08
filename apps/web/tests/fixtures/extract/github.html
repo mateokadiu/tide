@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>htmx-extensions/server-sent-events: SSE extension for htmx</title>
+<link rel="canonical" href="https://github.com/htmx-extensions/server-sent-events" />
+<meta property="og:site_name" content="GitHub" />
+</head>
+<body>
+<header>GitHub nav</header>
+<main>
+<article class="markdown-body">
+<h1 class="entry-title">htmx-extensions/server-sent-events</h1>
+<p>The Server-Sent Events extension lets you wire up htmx to consume an SSE endpoint, swap incoming events into the DOM, and reconnect automatically when the connection drops. It is the simplest way to add real-time updates to an htmx app without introducing a JavaScript framework or a websocket dependency.</p>
+<h2>Install</h2>
+<pre><code>&lt;script src="https://unpkg.com/htmx.org@2"&gt;&lt;/script&gt;
+&lt;script src="https://unpkg.com/htmx.org/dist/ext/server-sent-events.js"&gt;&lt;/script&gt;</code></pre>
+<h2>Usage</h2>
+<p>Mark a container with the <code>sse-connect</code> attribute pointing at your SSE endpoint, then use <code>sse-swap</code> on the children that should be updated:</p>
+<pre><code>&lt;div hx-ext="sse" sse-connect="/events"&gt;
+  &lt;div sse-swap="message"&gt;
+    waiting...
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+<p>When the server emits an event named <code>message</code>, the inner div is replaced. The default swap is <code>innerHTML</code>; pass <code>hx-swap="outerHTML"</code> to swap the element itself.</p>
+<h2>Server contract</h2>
+<p>Your server must respond with <code>Content-Type: text/event-stream</code> and flush messages in the standard SSE format: lines beginning with <code>data:</code>, optionally with a <code>event:</code> prefix to name the event, and a blank line between messages.</p>
+<h2>Reconnection</h2>
+<p>If the connection drops, the extension reconnects automatically with exponential backoff (starting at 1 second, capped at 30 seconds). You can disable this with <code>sse-reconnect="false"</code>.</p>
+<h2>Authentication</h2>
+<p>Cookies are sent with the SSE request by default. For token-based auth, you can intercept the connection event and add a header — but be aware that EventSource has limited header support in browsers. Most production deployments use cookies + same-origin or a short-lived signed token in the URL.</p>
+<h2>License</h2>
+<p>BSD-2-Clause.</p>
+</article>
+</main>
+</body>
+</html>
