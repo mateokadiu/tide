@@ -9,9 +9,15 @@ import * as schema from './schema';
 type DrizzlePg = ReturnType<typeof drizzlePg<typeof schema>>;
 type DrizzleSqlite = ReturnType<typeof drizzleSqlite<typeof schema>>;
 
-let cached: { db: DrizzlePg | DrizzleSqlite; driver: 'postgres' | 'sqlite' } | null = null;
+/**
+ * Drizzle's per-dialect types diverge enough that we expose the postgres type
+ * publicly (the production path) and adapt sqlite at the boundary. Queries
+ * that touch postgres-only features (vector, FTS) gate on `supportsVector()` /
+ * `supportsFts()`.
+ */
+let cached: { db: DrizzlePg; driver: 'postgres' | 'sqlite' } | null = null;
 
-export function db() {
+export function db(): DrizzlePg {
   if (cached) return cached.db;
 
   if (env.DATABASE_DRIVER === 'postgres') {
@@ -29,11 +35,14 @@ export function db() {
   const sqlite = new Database(env.DATABASE_FILE);
   sqlite.pragma('journal_mode = WAL');
   sqlite.pragma('foreign_keys = ON');
-  // biome-ignore lint/suspicious/noExplicitAny: drizzle schema is wired against pg-core
+  // biome-ignore lint/suspicious/noExplicitAny: cross-dialect adapter at the boundary
   const d = drizzleSqlite(sqlite, { schema: schema as any });
-  cached = { db: d as unknown as DrizzleSqlite, driver: 'sqlite' };
+  cached = { db: d as unknown as DrizzlePg, driver: 'sqlite' };
   return cached.db;
 }
+
+export type Db = DrizzlePg;
+export type DbSqlite = DrizzleSqlite;
 
 export function driver(): 'postgres' | 'sqlite' {
   if (!cached) db();

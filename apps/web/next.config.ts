@@ -2,7 +2,7 @@ import type { NextConfig } from 'next';
 
 const config: NextConfig = {
   reactStrictMode: true,
-  output: process.env.TIDE_STANDALONE === '1' ? 'standalone' : undefined,
+  ...(process.env.TIDE_STANDALONE === '1' ? { output: 'standalone' as const } : {}),
   experimental: {
     ppr: 'incremental',
     serverActions: {
