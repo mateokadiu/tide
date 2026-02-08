@@ -47,6 +47,18 @@ export function extractArticle({ url, html }: ExtractInput): ExtractedArticle {
   const dom = new JSDOM(html, { url, virtualConsole });
   const doc = dom.window.document;
 
+  // SPA fallback: if <noscript> contains a real article (a common pattern
+  // for SSR'd-into-noscript pages), promote it into the body before parsing.
+  const noscripts = Array.from(doc.querySelectorAll('noscript'));
+  for (const ns of noscripts) {
+    const inner = ns.textContent ?? '';
+    if (inner.includes('<article') || inner.length > 600) {
+      const replacement = doc.createElement('div');
+      replacement.innerHTML = inner;
+      ns.replaceWith(replacement);
+    }
+  }
+
   // Drop the obvious noise before Readability sees it (overrides supply their own list).
   const noisySelectors = override?.dropSelectors ?? [
     'script', 'style', 'noscript', 'iframe', 'svg.icon', '.newsletter',
