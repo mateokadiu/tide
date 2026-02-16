@@ -1,5 +1,5 @@
 import 'server-only';
-import { Queue, type ConnectionOptions } from 'bullmq';
+import { Queue, type QueueOptions } from 'bullmq';
 import IORedis from 'ioredis';
 import { env } from '@/lib/env';
 
@@ -11,16 +11,16 @@ export function redis(): IORedis {
   return connection;
 }
 
-function conn(): ConnectionOptions {
+function opts(): QueueOptions {
   return { connection: redis() };
 }
 
 export const queues = {
-  extract: new Queue('extract', conn()),
-  embed: new Queue('embed', conn()),
-  tag: new Queue('tag', conn()),
-  archiveHtml: new Queue('archive-html', conn()),
-  weeklyDigest: new Queue('weekly-digest', conn()),
+  extract: new Queue('extract', opts()),
+  embed: new Queue('embed', opts()),
+  tag: new Queue('tag', opts()),
+  archiveHtml: new Queue('archive-html', opts()),
+  weeklyDigest: new Queue('weekly-digest', opts()),
 } as const;
 
 export type QueueName = keyof typeof queues;
