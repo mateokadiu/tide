@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>tide — options</title>
+<style>
+  :root { color-scheme: dark; }
+  body {
+    background: #111418;
+    color: #e8eaed;
+    font-family: -apple-system, BlinkMacSystemFont, Inter, sans-serif;
+    padding: 32px;
+    max-width: 540px;
+  }
+  h1 { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 18px; }
+  label { display: block; font-size: 12px; color: #aab; margin-top: 16px; font-family: monospace; text-transform: uppercase; letter-spacing: 0.08em; }
+  input {
+    background: #1a1d22; color: #e8eaed; border: 1px solid #2a2d33; border-radius: 6px;
+    padding: 8px 10px; width: 100%; font-size: 13px; margin-top: 6px;
+  }
+  button {
+    margin-top: 20px;
+    background: #6fe3c7; color: #0f1115;
+    border: none; padding: 8px 14px; border-radius: 6px; font-weight: 500; cursor: pointer;
+  }
+  #status { color: #6fe3c7; font-size: 12px; margin-top: 12px; font-family: monospace; }
+  p { font-size: 12px; color: #86898f; line-height: 1.6; }
+</style>
+</head>
+<body>
+<h1>~/tide · extension options</h1>
+<p>get a token at <code>your-tide-url/settings</code>.</p>
+<form id="form">
+  <label>tide base url</label>
+  <input id="baseURL" type="url" placeholder="https://tide.example.com" required />
+  <label>api token</label>
+  <input id="token" type="password" placeholder="tide_pat_…" required />
+  <button type="submit">save</button>
+  <div id="status"></div>
+</form>
+<script type="module" src="options.js"></script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+{
+  "manifest_version": 3,
+  "name": "tide — save to library",
+  "version": "0.1.0",
+  "description": "Save anything to your tide library with one click.",
+  "browser_specific_settings": {
+    "gecko": { "id": "tide@mateokadiu.com", "strict_min_version": "115.0" }
+  },
+  "permissions": ["activeTab", "storage", "contextMenus", "notifications"],
+  "host_permissions": ["<all_urls>"],
+  "action": {
+    "default_title": "save to tide",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    },
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "options_ui": { "page": "options.html", "open_in_tab": true },
+  "commands": {
+    "save-current-tab": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+S",
+        "mac": "Command+Shift+S"
+      },
+      "description": "save the current tab to tide"
+    }
+  }
+}
