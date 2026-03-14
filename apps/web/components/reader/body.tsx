@@ -103,11 +103,11 @@ function describeXPath(node: Node, root: HTMLElement | null): string {
   const parts: string[] = [];
   let n: Node | null = node;
   while (n && n !== root) {
-    const p = n.parentNode;
-    if (!p) break;
-    const ix = Array.from(p.childNodes).indexOf(n as ChildNode);
+    const parent: Node | null = n.parentNode;
+    if (!parent) break;
+    const ix = Array.from(parent.childNodes).indexOf(n as ChildNode);
     parts.unshift(String(ix));
-    n = p;
+    n = parent;
   }
   return parts.join('/');
 }
@@ -115,13 +115,13 @@ function describeXPath(node: Node, root: HTMLElement | null): string {
 function wrapFirstMatch(root: HTMLElement, needle: string, hlId: string) {
   if (needle.length < 4) return;
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
-  let node: Node | null;
-  while ((node = walker.nextNode())) {
+  // biome-ignore lint/suspicious/noAssignInExpressions: TreeWalker loop pattern
+  for (let node: Node | null = walker.nextNode(); node; node = walker.nextNode()) {
     const t = node as Text;
     const idx = t.data.indexOf(needle);
     if (idx >= 0) {
       const before = t.splitText(idx);
-      const _after = before.splitText(needle.length);
+      before.splitText(needle.length);
       const span = document.createElement('mark');
       span.className = 'highlight';
       span.dataset.tideHl = hlId;

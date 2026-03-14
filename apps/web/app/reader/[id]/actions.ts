@@ -59,7 +59,7 @@ export async function archiveArticle(articleId: string, next: boolean) {
   const user = await requireUser();
   await db()
     .update(articles)
-    .set({ isArchived: next, isRead: next ? true : undefined })
+    .set({ isArchived: next, ...(next ? { isRead: true } : {}) })
     .where(and(eq(articles.id, articleId), eq(articles.userId, user.id)));
   revalidatePath('/library');
 }

@@ -157,8 +157,8 @@ function bionicTransform(root: HTMLElement) {
   // mark mid-word text nodes with <em> on the first half of each word.
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
   const nodes: Text[] = [];
-  let node: Node | null;
-  while ((node = walker.nextNode())) {
+  // biome-ignore lint/suspicious/noAssignInExpressions: TreeWalker loop pattern
+  for (let node: Node | null = walker.nextNode(); node; node = walker.nextNode()) {
     nodes.push(node as Text);
   }
   for (const t of nodes) {
