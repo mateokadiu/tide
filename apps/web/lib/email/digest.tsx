@@ -39,12 +39,12 @@ export async function sendDigestEmail(payload: DigestEmail): Promise<void> {
 
 function renderText(p: DigestEmail): string {
   const lines: string[] = [
-    `your tide week`,
-    ``,
+    'your tide week',
+    '',
     `saved: ${p.saved}`,
     `read:  ${p.read}`,
-    ``,
-    `top unread:`,
+    '',
+    'top unread:',
   ];
   for (const u of p.unread) {
     lines.push(
