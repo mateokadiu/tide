@@ -31,7 +31,8 @@ export async function mintApiToken(opts: {
       expiresAt: opts.expiresAt ?? null,
     })
     .returning({ id: apiTokens.id });
-  return { token, prefix, id: row!.id };
+  if (!row) throw new Error('failed to mint api token');
+  return { token, prefix, id: row.id };
 }
 
 /** Verify a bearer token. Returns the user_id or null. */
