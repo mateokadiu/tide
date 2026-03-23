@@ -59,9 +59,10 @@ export function ReaderControls({ initial }: { initial: ReaderPrefs }) {
         Aa
       </Button>
       {open ? (
-        <div
-          className="absolute right-0 top-10 z-40 w-72 rounded-lg border border-border bg-popover p-4 shadow-xl"
-          role="dialog"
+        <dialog
+          open
+          className="absolute right-0 top-10 z-40 w-72 rounded-lg border border-border bg-popover p-4 shadow-xl block static"
+          aria-label="reader controls"
         >
           <Row label="font">
             {FONTS.map((f) => (
@@ -99,7 +100,7 @@ export function ReaderControls({ initial }: { initial: ReaderPrefs }) {
               bionic
             </Pill>
           </Row>
-        </div>
+        </dialog>
       ) : null}
     </div>
   );
@@ -157,9 +158,10 @@ function bionicTransform(root: HTMLElement) {
   // mark mid-word text nodes with <em> on the first half of each word.
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
   const nodes: Text[] = [];
-  // biome-ignore lint/suspicious/noAssignInExpressions: TreeWalker loop pattern
-  for (let node: Node | null = walker.nextNode(); node; node = walker.nextNode()) {
+  let node = walker.nextNode();
+  while (node) {
     nodes.push(node as Text);
+    node = walker.nextNode();
   }
   for (const t of nodes) {
     if (t.parentElement?.classList.contains('bionic-applied')) continue;

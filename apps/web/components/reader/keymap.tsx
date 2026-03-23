@@ -70,14 +70,15 @@ function jump(direction: 1 | -1) {
   const y = window.scrollY + 80;
   let idx = -1;
   for (let i = 0; i < paras.length; i++) {
-    const top = paras[i]!.getBoundingClientRect().top + window.scrollY;
+    const node = paras[i];
+    if (!node) continue;
+    const top = node.getBoundingClientRect().top + window.scrollY;
     if (top > y) {
       idx = direction === 1 ? i : i - 2;
       break;
     }
   }
   if (idx < 0) idx = paras.length - 1;
-  if (idx >= 0 && idx < paras.length) {
-    paras[idx]!.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
+  const target = paras[Math.max(0, Math.min(paras.length - 1, idx))];
+  target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }

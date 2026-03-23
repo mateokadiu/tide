@@ -115,8 +115,8 @@ function describeXPath(node: Node, root: HTMLElement | null): string {
 function wrapFirstMatch(root: HTMLElement, needle: string, hlId: string) {
   if (needle.length < 4) return;
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
-  // biome-ignore lint/suspicious/noAssignInExpressions: TreeWalker loop pattern
-  for (let node: Node | null = walker.nextNode(); node; node = walker.nextNode()) {
+  let node: Node | null = walker.nextNode();
+  while (node) {
     const t = node as Text;
     const idx = t.data.indexOf(needle);
     if (idx >= 0) {
@@ -129,5 +129,6 @@ function wrapFirstMatch(root: HTMLElement, needle: string, hlId: string) {
       before.parentNode?.replaceChild(span, before);
       return;
     }
+    node = walker.nextNode();
   }
 }

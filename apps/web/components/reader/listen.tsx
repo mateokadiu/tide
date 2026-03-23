@@ -35,8 +35,9 @@ export function ListenButton({ articleId }: ListenButtonProps) {
         setState('idle');
         return;
       }
-      const node = paras[idx]!;
+      const node = paras[idx];
       idx++;
+      if (!node) return next();
       const text = node.textContent?.trim() ?? '';
       if (!text) return next();
       const u = new SpeechSynthesisUtterance(text);
