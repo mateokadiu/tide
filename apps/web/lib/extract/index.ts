@@ -66,7 +66,7 @@ export function extractArticle({ url, html }: ExtractInput): ExtractedArticle {
     '[data-component="ad"]', '[aria-label*="advert" i]',
   ];
   for (const sel of noisySelectors) {
-    doc.querySelectorAll(sel).forEach((el) => el.remove());
+    for (const el of Array.from(doc.querySelectorAll(sel))) el.remove();
   }
 
   const canonical =

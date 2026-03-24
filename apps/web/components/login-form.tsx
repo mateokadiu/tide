@@ -45,10 +45,14 @@ export function LoginForm({ providers }: { providers: Providers }) {
   return (
     <div className="mt-8 space-y-6">
       <form onSubmit={onMagicLink} className="space-y-3">
-        <label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
+        <label
+          htmlFor="login-email"
+          className="text-xs font-mono uppercase tracking-wider text-muted-foreground"
+        >
           email
         </label>
         <Input
+          id="login-email"
           type="email"
           required
           placeholder="you@example.com"

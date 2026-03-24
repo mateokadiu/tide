@@ -28,14 +28,15 @@ export async function runTagJob(job: TagJob): Promise<void> {
       .where(and(eq(tags.userId, job.userId), eq(tags.name, name)))
       .limit(1);
 
-    const tagId =
-      existing[0]?.id ??
-      (
-        await db()
-          .insert(tags)
-          .values({ userId: job.userId, name, source: 'ai' })
-          .returning({ id: tags.id })
-      )[0]!.id;
+    let tagId = existing[0]?.id;
+    if (!tagId) {
+      const inserted = await db()
+        .insert(tags)
+        .values({ userId: job.userId, name, source: 'ai' })
+        .returning({ id: tags.id });
+      tagId = inserted[0]?.id;
+    }
+    if (!tagId) continue;
 
     await db()
       .insert(articleTags)
