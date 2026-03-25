@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
-import { eq, and, desc, isNull, inArray } from 'drizzle-orm';
+import { eq, and, desc } from 'drizzle-orm';
 import { db } from '@/db/client';
 import { articles } from '@/db/schema/articles';
 import { requireUser } from '@/lib/auth/session';
@@ -105,16 +105,14 @@ async function Rows({ userId, filter, q }: { userId: string; filter: Filter; q: 
   );
 }
 
+const SKELETON_KEYS = ['s0', 's1', 's2', 's3', 's4', 's5'] as const;
+
 function RowsSkeleton() {
   return (
     <ul className="divide-y divide-border border border-border rounded-lg overflow-hidden bg-card">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <li key={i} className="h-20 animate-pulse bg-muted/30" />
+      {SKELETON_KEYS.map((k) => (
+        <li key={k} className="h-20 animate-pulse bg-muted/30" />
       ))}
     </ul>
   );
 }
-
-// Stop biome unused-import on inArray / isNull (kept for future filters)
-void inArray;
-void isNull;
