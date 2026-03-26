@@ -23,13 +23,13 @@ browser.commands.onCommand.addListener(async (command) => {
   if (command !== 'save-current-tab') return;
   const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
   if (!tab?.url) return;
-  const result = await saveCurrentTab({ url: tab.url, title: tab.title ?? undefined });
+  const result = await saveCurrentTab(tab.title ? { url: tab.url, title: tab.title } : { url: tab.url });
   notify(result);
 });
 
 browser.action.onClicked.addListener(async (tab) => {
   if (!tab.url) return;
-  const result = await saveCurrentTab({ url: tab.url, title: tab.title ?? undefined });
+  const result = await saveCurrentTab(tab.title ? { url: tab.url, title: tab.title } : { url: tab.url });
   notify(result);
 });
 

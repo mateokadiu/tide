@@ -22,7 +22,7 @@ export async function getSettings(): Promise<Settings | null> {
 
 export async function saveCurrentTab(input: {
   url: string;
-  title?: string;
+  title?: string | undefined;
 }): Promise<SaveResult> {
   const settings = await getSettings();
   if (!settings) {

@@ -2,14 +2,16 @@ import browser from 'webextension-polyfill';
 import { saveCurrentTab } from './save';
 
 async function init() {
-  const status = document.getElementById('status')!;
+  const status = document.getElementById('status');
+  if (!status) return;
   const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
   if (!tab?.url) {
     status.textContent = 'no active tab.';
     return;
   }
   status.textContent = 'saving…';
-  const result = await saveCurrentTab({ url: tab.url, title: tab.title ?? undefined });
+  const title = tab.title ?? undefined;
+  const result = await saveCurrentTab(title ? { url: tab.url, title } : { url: tab.url });
   if (result.ok) {
     status.textContent = result.deduplicated ? 'already saved.' : 'saved.';
     status.dataset.state = 'ok';
