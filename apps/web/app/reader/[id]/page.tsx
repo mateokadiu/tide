@@ -14,8 +14,6 @@ import { ReaderSummary } from '@/components/reader/summary';
 import { ReaderRelated } from '@/components/reader/related';
 import { ListenButton } from '@/components/reader/listen';
 
-export const dynamic = 'force-dynamic';
-
 export default async function ReaderPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const user = await requireUser();

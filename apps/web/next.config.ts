@@ -4,7 +4,6 @@ const config: NextConfig = {
   reactStrictMode: true,
   ...(process.env.TIDE_STANDALONE === '1' ? { output: 'standalone' as const } : {}),
   experimental: {
-    ppr: 'incremental',
     serverActions: {
       bodySizeLimit: '2mb',
     },

@@ -1,8 +1,6 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
-export const experimental_ppr = true;
-
 export default function MarketingPage() {
   return (
     <main className="min-h-screen">

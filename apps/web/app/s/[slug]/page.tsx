@@ -4,9 +4,6 @@ import { eq, and } from 'drizzle-orm';
 import { db } from '@/db/client';
 import { articles } from '@/db/schema/articles';
 
-export const experimental_ppr = true;
-export const revalidate = 3_600;
-
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const [article] = await db()
