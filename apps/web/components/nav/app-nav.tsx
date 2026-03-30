@@ -29,6 +29,12 @@ export function AppNav() {
             highlights
           </Link>
           <Link
+            href="/search"
+            className="px-2 py-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground"
+          >
+            search
+          </Link>
+          <Link
             href="/settings"
             className="px-2 py-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground"
           >
