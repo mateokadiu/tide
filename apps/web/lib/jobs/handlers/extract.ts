@@ -6,7 +6,7 @@ import { notifications } from '@/db/schema/notifications';
 import { fetchPage } from '@/lib/extract/fetch';
 import { extractArticle, ExtractError } from '@/lib/extract';
 import { sanitizeHtml } from '@/lib/extract/sanitize';
-import { queues, type ExtractJob } from '../queue';
+import { publishNotification, queues, type ExtractJob } from '../queue';
 
 export async function runExtractJob(job: ExtractJob): Promise<void> {
   const start = Date.now();
@@ -54,10 +54,16 @@ export async function runExtractJob(job: ExtractJob): Promise<void> {
       ),
     ]);
 
+    const ms = Date.now() - start;
     await db().insert(notifications).values({
       userId: job.userId,
       kind: 'extract.ok',
-      payload: JSON.stringify({ articleId: job.articleId, ms: Date.now() - start }),
+      payload: JSON.stringify({ articleId: job.articleId, ms }),
+    });
+    await publishNotification(job.userId, {
+      kind: 'extract.ok',
+      articleId: job.articleId,
+      ms,
     });
   } catch (err) {
     const code = err instanceof ExtractError ? err.code : 'unknown';
@@ -70,6 +76,11 @@ export async function runExtractJob(job: ExtractJob): Promise<void> {
       userId: job.userId,
       kind: 'extract.failed',
       payload: JSON.stringify({ articleId: job.articleId, code, message }),
+    });
+    await publishNotification(job.userId, {
+      kind: 'extract.failed',
+      articleId: job.articleId,
+      message: `${code}: ${message}`,
     });
     throw err;
   }

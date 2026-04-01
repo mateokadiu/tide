@@ -45,3 +45,25 @@ export interface ArchiveHtmlJob {
   url: string;
   html: string;
 }
+
+export type NotificationKind =
+  | 'extract.ok'
+  | 'extract.failed'
+  | 'summary.ready'
+  | 'digest.ready'
+  | 'embed.ok';
+
+export interface NotificationPayload {
+  kind: NotificationKind;
+  articleId?: string;
+  message?: string;
+  ms?: number;
+}
+
+/** Publish a notification to a user's SSE channel. */
+export async function publishNotification(
+  userId: string,
+  payload: NotificationPayload,
+): Promise<void> {
+  await redis().publish(`tide:notifications:${userId}`, JSON.stringify(payload));
+}
