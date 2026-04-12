@@ -69,7 +69,7 @@
     "zod": "3.23.8"
   },
   "devDependencies": {
-    "@playwright/test": "1.49.0",
+    "@playwright/test": "1.51.1",
     "@tide/sdk": "workspace:*",
     "@types/better-sqlite3": "7.6.12",
     "@types/dompurify": "3.0.5",
