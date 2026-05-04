@@ -1,0 +1,4 @@
+name: tide
+runtime: nodejs
+description: Oracle Cloud Always-Free single-VM recipe for tide self-hosting.
+main: index.ts

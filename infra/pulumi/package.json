@@ -1,0 +1,14 @@
+{
+  "name": "@tide/infra-pulumi",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@pulumi/oci": "^2.0.0",
+    "@pulumi/pulumi": "^3.140.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.1",
+    "typescript": "5.6.3"
+  }
+}
