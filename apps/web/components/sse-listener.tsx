@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/components/ui/toaster';
 
 interface NotificationPayload {
   kind: 'extract.ok' | 'extract.failed' | 'summary.ready' | 'digest.ready' | 'embed.ok';
@@ -10,6 +11,14 @@ interface NotificationPayload {
   ms?: number;
 }
 
+const TITLES: Record<NotificationPayload['kind'], string> = {
+  'extract.ok': 'saved',
+  'extract.failed': 'extract failed',
+  'summary.ready': 'summary ready',
+  'digest.ready': 'digest ready',
+  'embed.ok': 'embed indexed',
+};
+
 /**
  * Mounts an EventSource against the per-user SSE channel and toasts the
  * notifications. The library page revalidates when "extract.ok" arrives so the
@@ -17,6 +26,7 @@ interface NotificationPayload {
  */
 export function SseListener() {
   const router = useRouter();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (typeof window === 'undefined' || !('EventSource' in window)) return;
@@ -32,6 +42,11 @@ export function SseListener() {
       if (payload.kind === 'extract.ok' || payload.kind === 'extract.failed') {
         router.refresh();
       }
+      toast({
+        title: TITLES[payload.kind],
+        ...(payload.message ? { description: payload.message } : {}),
+        ...(payload.kind === 'extract.failed' ? { variant: 'destructive' as const } : {}),
+      });
       window.dispatchEvent(
         new CustomEvent('tide:notification', { detail: payload }),
       );
@@ -42,7 +57,7 @@ export function SseListener() {
     };
 
     return () => es.close();
-  }, [router]);
+  }, [router, toast]);
 
   return null;
 }

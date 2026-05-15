@@ -40,8 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" data-theme="dark" suppressHydrationWarning>
       <body>
         <ThemeProvider>
-          {children}
-          <Toaster />
+          <Toaster>{children}</Toaster>
         </ThemeProvider>
       </body>
     </html>
