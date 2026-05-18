@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, desc, lt } from 'drizzle-orm';
 import { SaveArticleRequest } from '@tide/sdk';
 import { db } from '@/db/client';
 import { articles } from '@/db/schema/articles';
@@ -12,6 +12,63 @@ function bearerFrom(req: NextRequest): string | null {
   const h = req.headers.get('authorization');
   if (!h?.toLowerCase().startsWith('bearer ')) return null;
   return h.slice(7).trim();
+}
+
+/**
+ * List the caller's articles. Cursor-paged on (created_at desc, id desc).
+ * Cursor format: `<iso>:<uuid>`. Pagination is forward-only.
+ */
+export async function GET(req: NextRequest) {
+  const token = bearerFrom(req);
+  if (!token) return NextResponse.json({ error: 'missing bearer token' }, { status: 401 });
+
+  const verified = await verifyApiToken(token, 'articles:read');
+  if (!verified) {
+    return NextResponse.json({ error: 'invalid token or scope' }, { status: 401 });
+  }
+
+  const url = new URL(req.url);
+  const limit = Math.min(Math.max(Number(url.searchParams.get('limit') ?? 20), 1), 100);
+  const cursor = url.searchParams.get('cursor');
+  const conditions = [eq(articles.userId, verified.userId)];
+  if (cursor) {
+    const [iso, id] = cursor.split(':');
+    if (iso && id) {
+      const date = new Date(iso);
+      if (!Number.isNaN(date.valueOf())) {
+        conditions.push(lt(articles.createdAt, date));
+      }
+    }
+  }
+
+  const rows = await db()
+    .select({
+      id: articles.id,
+      url: articles.url,
+      canonicalUrl: articles.canonicalUrl,
+      title: articles.title,
+      excerpt: articles.excerpt,
+      state: articles.state,
+      isRead: articles.isRead,
+      isStarred: articles.isStarred,
+      isArchived: articles.isArchived,
+      readingMinutes: articles.readingMinutes,
+      createdAt: articles.createdAt,
+    })
+    .from(articles)
+    .where(and(...conditions))
+    .orderBy(desc(articles.createdAt), desc(articles.id))
+    .limit(limit + 1);
+
+  const hasMore = rows.length > limit;
+  const items = hasMore ? rows.slice(0, limit) : rows;
+  const last = items[items.length - 1];
+  const nextCursor = hasMore && last ? `${last.createdAt.toISOString()}:${last.id}` : null;
+
+  return NextResponse.json({
+    items: items.map((r) => ({ ...r, createdAt: r.createdAt.toISOString() })),
+    nextCursor,
+  });
 }
 
 export async function POST(req: NextRequest) {
