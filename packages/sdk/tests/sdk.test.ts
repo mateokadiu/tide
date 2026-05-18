@@ -104,4 +104,40 @@ describe('TideClient', () => {
       TideApiError,
     );
   });
+
+  it('lists articles via GET /api/v1/articles', async () => {
+    const fakeRes = {
+      items: [
+        {
+          id: '00000000-0000-0000-0000-000000000001',
+          url: 'https://example.com/x',
+          canonicalUrl: 'https://example.com/x',
+          title: 'x',
+          excerpt: null,
+          state: 'ready' as const,
+          isRead: false,
+          isStarred: false,
+          isArchived: false,
+          readingMinutes: 4,
+          createdAt: new Date().toISOString(),
+        },
+      ],
+      nextCursor: '2026-03-01T00:00:00Z:abc',
+    };
+    const fetchMock = async (input: RequestInfo | URL) => {
+      expect(String(input)).toBe('https://tide.test/api/v1/articles?limit=10');
+      return new Response(JSON.stringify(fakeRes), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      });
+    };
+    const client = new TideClient({
+      baseURL: 'https://tide.test',
+      token: 'tide_pat_abc',
+      fetch: fetchMock as unknown as typeof fetch,
+    });
+    const out = await client.listArticles({ limit: 10 });
+    expect(out.items).toHaveLength(1);
+    expect(out.nextCursor).toBeTruthy();
+  });
 });

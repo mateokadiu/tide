@@ -21,6 +21,34 @@ export const SaveArticleResponse = z.object({
 
 export type SaveArticleResponse = z.infer<typeof SaveArticleResponse>;
 
+export const ArticleListItem = z.object({
+  id: z.string().uuid(),
+  url: z.string().url(),
+  canonicalUrl: z.string().url(),
+  title: z.string(),
+  excerpt: z.string().nullable(),
+  state: z.enum(['pending', 'extracting', 'ready', 'failed']),
+  isRead: z.boolean(),
+  isStarred: z.boolean(),
+  isArchived: z.boolean(),
+  readingMinutes: z.number().nullable(),
+  createdAt: z.string(),
+});
+
+export type ArticleListItem = z.infer<typeof ArticleListItem>;
+
+export const ListArticlesResponse = z.object({
+  items: z.array(ArticleListItem),
+  nextCursor: z.string().nullable(),
+});
+
+export type ListArticlesResponse = z.infer<typeof ListArticlesResponse>;
+
+export interface ListArticlesQuery {
+  limit?: number;
+  cursor?: string | null;
+}
+
 export class TideApiError extends Error {
   constructor(
     message: string,
@@ -65,6 +93,23 @@ export class TideClient {
     }
     const json: unknown = await res.json();
     return SaveArticleResponse.parse(json);
+  }
+
+  async listArticles(query: ListArticlesQuery = {}): Promise<ListArticlesResponse> {
+    const params = new URLSearchParams();
+    if (query.limit) params.set('limit', String(query.limit));
+    if (query.cursor) params.set('cursor', query.cursor);
+    const url = `${this.baseURL}/api/v1/articles${params.size > 0 ? `?${params}` : ''}`;
+    const res = await this.fetcher(url, {
+      method: 'GET',
+      headers: { authorization: `Bearer ${this.token}` },
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      throw new TideApiError(text || res.statusText, res.status);
+    }
+    const json: unknown = await res.json();
+    return ListArticlesResponse.parse(json);
   }
 }
 
