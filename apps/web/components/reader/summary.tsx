@@ -2,51 +2,42 @@ import { eq } from 'drizzle-orm';
 import { db } from '@/db/client';
 import { articles } from '@/db/schema/articles';
 import { env } from '@/lib/env';
-import { summarize } from '@/lib/ai/summary';
+import { SummaryButton } from './summary-button';
 
 /**
- * Server component that streams the summary into the Suspense boundary.
- * The summary is cached on the article row once generated.
+ * Server component. Renders the cached summary if one exists; otherwise renders
+ * an "ask for a summary" button that calls the streaming server action. The
+ * Anthropic call only fires on user intent, per
+ * [PLAN.md row 14](../../../PLAN.md).
  */
 export async function ReaderSummary({ articleId }: { articleId: string }) {
   const [article] = await db()
-    .select({
-      title: articles.title,
-      byline: articles.byline,
-      summary: articles.summary,
-      text: articles.contentText,
-    })
+    .select({ summary: articles.summary })
     .from(articles)
     .where(eq(articles.id, articleId))
     .limit(1);
 
-  if (!article || !article.text) return null;
+  if (!article) return null;
 
-  let summary = article.summary;
-  if (!summary && env.ANTHROPIC_API_KEY) {
-    try {
-      summary = await summarize({
-        title: article.title,
-        byline: article.byline,
-        text: article.text,
-      });
-      await db()
-        .update(articles)
-        .set({ summary, summaryGeneratedAt: new Date() })
-        .where(eq(articles.id, articleId));
-    } catch (err) {
-      console.warn('[summary] generation failed', err);
-    }
+  if (article.summary) {
+    return (
+      <section>
+        <h3 className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-3">
+          summary
+        </h3>
+        <p className="text-base leading-relaxed">{article.summary}</p>
+      </section>
+    );
   }
 
-  if (!summary) {
+  if (!env.ANTHROPIC_API_KEY) {
     return (
       <section>
         <h3 className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-3">
           summary
         </h3>
         <p className="text-sm text-muted-foreground">
-          summary unavailable — anthropic key not configured.
+          summary unavailable — <code className="font-mono">ANTHROPIC_API_KEY</code> not configured.
         </p>
       </section>
     );
@@ -57,7 +48,7 @@ export async function ReaderSummary({ articleId }: { articleId: string }) {
       <h3 className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-3">
         summary
       </h3>
-      <p className="text-base leading-relaxed">{summary}</p>
+      <SummaryButton articleId={articleId} />
     </section>
   );
 }
