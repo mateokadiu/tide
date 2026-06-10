@@ -1,8 +1,10 @@
 import 'server-only';
+import { randomUUID } from 'node:crypto';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { magicLink } from 'better-auth/plugins';
 import { db } from '@/db/client';
+import { accounts, sessions, users, verifications } from '@/db/schema/users';
 import { env } from '@/lib/env';
 import { sendMagicLinkEmail } from '@/lib/email/magic-link';
 
@@ -25,7 +27,14 @@ if (env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET) {
 export const auth = betterAuth({
   database: drizzleAdapter(db(), {
     provider: env.DATABASE_DRIVER === 'sqlite' ? 'sqlite' : 'pg',
+    schema: { users, sessions, accounts, verifications },
+    usePlural: true,
   }),
+  advanced: {
+    database: {
+      generateId: () => randomUUID(),
+    },
+  },
   secret: env.AUTH_SECRET,
   baseURL: env.NEXT_PUBLIC_APP_URL,
   emailAndPassword: { enabled: false },
