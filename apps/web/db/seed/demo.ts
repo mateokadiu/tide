@@ -2,13 +2,49 @@
 // Idempotent — re-running upserts the same user + dedupes the saves.
 
 import 'dotenv/config';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { eq } from 'drizzle-orm';
-import { db } from '../client';
+import { drizzle } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
 import { articles, type ArticleSource } from '../schema/articles';
 import { users } from '../schema/users';
 import { tags, articleTags } from '../schema/tags';
-import { canonicalizeUrl, urlHash } from '../../lib/extract/url-hash';
+import * as schema from '../schema';
+
+// Seed runs from CLI so we cannot pull `@/db/client` (`server-only`). Build our
+// own connection here.
+const databaseUrl = process.env.DATABASE_URL;
+if (!databaseUrl) {
+  throw new Error('DATABASE_URL is required to seed');
+}
+const sql = postgres(databaseUrl, { max: 4, prepare: false });
+const db = () => drizzle(sql, { schema });
+
+// Lightweight local copy of canonicalizeUrl + urlHash so we don't pull the
+// `@/lib/extract` module (also server-only via its env imports).
+const canonicalizeUrl = (raw: string): string => {
+  const u = new URL(raw);
+  u.hash = '';
+  const trackingParams = [
+    'utm_source',
+    'utm_medium',
+    'utm_campaign',
+    'utm_term',
+    'utm_content',
+    'gclid',
+    'fbclid',
+    'mc_cid',
+    'mc_eid',
+    'ref',
+  ];
+  for (const p of trackingParams) u.searchParams.delete(p);
+  if (u.pathname.length > 1 && u.pathname.endsWith('/')) {
+    u.pathname = u.pathname.slice(0, -1);
+  }
+  return u.toString();
+};
+const urlHash = (url: string): string =>
+  createHash('sha256').update(canonicalizeUrl(url)).digest('hex');
 
 interface Seed {
   url: string;

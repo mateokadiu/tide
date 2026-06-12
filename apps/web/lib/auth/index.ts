@@ -1,5 +1,4 @@
 import 'server-only';
-import { randomUUID } from 'node:crypto';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { magicLink } from 'better-auth/plugins';
@@ -31,9 +30,8 @@ export const auth = betterAuth({
     usePlural: true,
   }),
   advanced: {
-    database: {
-      generateId: () => randomUUID(),
-    },
+    // Schema columns are `uuid` with `defaultRandom()` — let Postgres assign IDs.
+    generateId: false,
   },
   secret: env.AUTH_SECRET,
   baseURL: env.NEXT_PUBLIC_APP_URL,
