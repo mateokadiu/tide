@@ -58,6 +58,7 @@ export const sessions = pgTable(
     userAgent: text('user_agent'),
     ipAddress: text('ip_address'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => ({
     tokenIdx: uniqueIndex('sessions_token_idx').on(t.token),
@@ -78,6 +79,7 @@ export const accounts = pgTable(
     refreshToken: text('refresh_token'),
     expiresAt: timestamp('expires_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => ({
     providerAccountIdx: uniqueIndex('accounts_provider_account_idx').on(
