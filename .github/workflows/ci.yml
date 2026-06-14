@@ -144,6 +144,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @tide/web exec playwright install --with-deps chromium
       - run: pnpm --filter @tide/web db:migrate
+      - run: pnpm --filter @tide/web build
       - run: pnpm test:e2e
       - if: always()
         uses: actions/upload-artifact@v4
