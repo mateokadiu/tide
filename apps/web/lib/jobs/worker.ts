@@ -1,8 +1,13 @@
 /**
  * BullMQ worker process. Runs alongside the web process (or as a sidecar).
  * Entry: `pnpm worker` (calls `tsx lib/jobs/worker.ts`).
+ *
+ * Intentionally does NOT import 'server-only' — this entrypoint runs from a
+ * standalone Node process via tsx, not through a Next.js bundler. The handlers
+ * it dispatches to are server-side modules; running them from this CLI is the
+ * canonical pattern.
  */
-import 'server-only';
+import 'dotenv/config';
 import { Worker } from 'bullmq';
 import { redis } from './queue';
 import { runExtractJob } from './handlers/extract';

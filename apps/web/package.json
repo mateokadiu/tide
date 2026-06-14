@@ -15,11 +15,11 @@
     "test:e2e:ui": "playwright test --ui",
     "test:loadtest": "node ./scripts/loadtest.mjs",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "tsx db/migrate.ts",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "seed:demo": "tsx db/seed/demo.ts",
-    "worker": "tsx lib/jobs/worker.ts",
+    "seed:demo": "tsx --tsconfig tsconfig.worker.json db/seed/demo.ts",
+    "worker": "tsx --tsconfig tsconfig.worker.json lib/jobs/worker.ts",
+    "db:migrate": "tsx --tsconfig tsconfig.worker.json db/migrate.ts",
     "lighthouse": "lhci autorun"
   },
   "dependencies": {
