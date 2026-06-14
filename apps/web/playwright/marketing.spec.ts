@@ -5,7 +5,7 @@ test.describe('marketing surface', () => {
     await page.goto('/');
     await expect(page.getByRole('heading', { level: 1 })).toContainText('save anything');
     await expect(page.getByText('capture surfaces')).toBeVisible();
-    await expect(page.getByRole('link', { name: /github/i })).toBeVisible();
+    await expect(page.getByRole('link', { name: /github/i }).first()).toBeVisible();
   });
 
   test('login link routes to /login', async ({ page }) => {
